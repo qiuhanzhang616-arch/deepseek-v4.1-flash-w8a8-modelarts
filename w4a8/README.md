@@ -1,5 +1,8 @@
 # 在公有云 ModelArts Standard 部署 DeepSeek-V4.1-Flash W4A8（A2）
 
+> English runbook for the currently verified four-replica production profile:
+> [DeepSeek-V4.1-Flash W4A8 Production Deployment Guide](PRODUCTION_DEPLOYMENT_EN.md).
+
 本指南面向第一次接手部署的工程师，覆盖权重和镜像来源、脚本打包、SWR 推送、SFS Turbo、ModelArts 实时服务、验收与回滚。它记录的是 **Ascend A2 上验证过的一种 W4A8 单机副本方案**，不是适用于所有区域、驱动和镜像版本的通用参数。请先在隔离服务验证，勿直接覆盖生产路由。
 
 > 权重是社区发布方 [chiro2001 的 ModelScope W4A8 包](https://www.modelscope.cn/models/chiro2001/DeepSeek-V4.1-Flash-w4a8-Ascend)，不是 DeepSeek 原始未量化权重。运行时代码取自同一发布方的 [A2 仓库](https://github.com/chiro2001/deepseek-v4.1-flash-ascend910B)。模型、代码、基础镜像各有自己的许可与发布责任；复用前自行核对。
