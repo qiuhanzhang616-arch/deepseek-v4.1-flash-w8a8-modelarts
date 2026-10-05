@@ -37,19 +37,58 @@ The external ModelArts/LiteLLM name stays `deepseek-v4.1-flash`.
 
 ## 2. Production image and artifact pinning
 
-The verified production image tag is:
+The verified production image reference shown by ModelArts is:
 
 ```text
 modelarts/vllm-ascend:deepseek-v41-flash-a2-w4a8-ee0892-20260930
 ```
 
-The deployment record associates this custom image with source commit
-`ee0892aa68dd0faa7fc24c31e9690facc58660a2`. The registry manifest digest was
-not captured in the available production record. Before reproducing or
-upgrading this image, obtain its immutable SWR/OCI digest and verify the
-container's `BUILD_INFO`; **do not treat the mutable tag as a full artifact
-pin**. The tag is an internal A2/W4A8 build, not a claim that it is the
-upstream-published W8A8 image.
+This is the image name and tag shown in ModelArts, **not a complete public
+`docker pull` address**. The production record does not contain the private SWR
+registry hostname/path or OCI manifest digest, so the exact production image
+cannot currently be downloaded by another project from this guide. In the
+owning project, open the image details in SWR and copy its full pull command
+and immutable digest. The full reference should have this form (placeholders
+must be replaced with the values from SWR):
+
+```text
+swr.<region>.myhuaweicloud.com/<organization>/vllm-ascend:deepseek-v41-flash-a2-w4a8-ee0892-20260930@sha256:<manifest-digest>
+```
+
+The destination project also needs authorized image-pull access. Do not guess
+the registry hostname from the ModelArts short name above.
+
+### Public build inputs (not the finished production image)
+
+If the private production image cannot be shared, this repository records a
+separate ARM64 W4A8 build path. It uses the following base-image address:
+
+```text
+quay.nju.edu.cn/ascend/vllm-ascend:deepseek-v4.1-flash-openeuler@sha256:0713ca300d55cd907a8beb9fca2444d8f2cf18036e9652f73a636d3dc54fc2a4
+```
+
+This is a third-party mirror of the **base vLLM-Ascend image only**. It is not
+the finished W4A8 production image, and it does not include the W4A8 runtime
+customizations or checkpoint. If network policy blocks this mirror, use an
+approved equivalent base only after checking its architecture, CANN/runtime
+versions, and digest.
+
+The build inputs are:
+
+- Pinned publisher A2 source: [`chiro2001/deepseek-v4.1-flash-ascend910B`
+  at commit `7e902a1ab49ee299d37bd38c8cde3f680ce4dc7f`](https://github.com/chiro2001/deepseek-v4.1-flash-ascend910B/tree/7e902a1ab49ee299d37bd38c8cde3f680ce4dc7f).
+- Build/push steps: [W4A8 ModelArts guide](README.md) and
+  [`tools/build_and_push.sh`](tools/build_and_push.sh). The script builds a
+  new image from its own pinned publisher source/base and pushes it to a
+  destination SWR URI supplied by the project owner.
+
+That script creates a new build; it does **not** claim to reproduce the
+production tag byte-for-byte. The tag contains `ee0892`, and an accompanying
+runtime-preparation record associates that build label with source commit
+`ee0892aa68dd0faa7fc24c31e9690facc58660a2`, but the production record itself
+does not include `BUILD_INFO` or a manifest digest to verify the exact binary.
+Validate a rebuilt image separately before using it. Do not substitute the
+official upstream W8A8 image for this W4A8 image.
 
 The production checkpoint is stored on the approved SFS Turbo model mount.
 Keep the mounted model and Engram files read-only. Record the exact publisher
@@ -228,6 +267,11 @@ effective runtime before relying on this snapshot for a later change.
 - The production image tag is recorded, but its immutable registry manifest
   digest was not present in the deployment evidence available when this guide
   was written. Obtain it before claiming byte-for-byte reproducibility.
+- The private SWR registry hostname, organization path, and cross-project pull
+  permission are not present in the deployment record. The tag above is the
+  ModelArts selection reference, not a portable public download URL. The
+  base-image URL and build inputs are provided as an alternative way to create
+  a separately validated image, not to retrieve the exact production bits.
 - The exact production weight snapshot/revision and full SFS checksum manifest
   should be linked from the controlled release record; this public guide
   intentionally contains no tenant SFS path or internal endpoint.
