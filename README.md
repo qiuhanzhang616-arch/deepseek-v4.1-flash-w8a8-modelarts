@@ -112,7 +112,7 @@ On the preparation host, set a tenant-owned SFS path and clone this repository:
 
 ```bash
 export DEPLOY_ROOT=/mnt/sfs-turbo/CHANGE_ME_SFS_DIRECTORY
-git clone https://github.com/qiuhanzhang616-arch/deepseek-v4.1-flash-modelarts.git "$DEPLOY_ROOT"
+git clone https://github.com/qiuhanzhang616-arch/deepseek-v4.1-flash-w8a8-modelarts.git "$DEPLOY_ROOT"
 cd "$DEPLOY_ROOT"
 mkdir -p weights manifests runtime-logs benchmark-results
 ```
